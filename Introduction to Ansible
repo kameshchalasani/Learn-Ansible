@@ -1,3 +1,15 @@
+What is Ansible?
+Ansible is an open-source IT automation tool used for:
+
+1. Configuration Management – Ensures systems are set up consistently (e.g., installing packages, configuring services).
+2. Application Deployment – Automates software deployment and updates.
+3. Orchestration – Manages complex workflows across multiple systems.
+4. Provisioning – Sets up infrastructure on cloud platforms (AWS, Azure, GCP).
+5. Automation of Routine Tasks – Automates repetitive administrative tasks, like backups and user management.
+
+__________________________________________________________________________________________________________________________________________________________________________________________________________
+------------Key Points--------------------------------------------------------------------------------------------
+___________________________________________________________________________________________________________________________________________________________________________________________________________
 1.	Automation Tool – Ansible is an open-source IT automation tool used for configuration management, application deployment, and task automation.
 2.	Agentless – It does not require any agent to be installed on managed nodes; it uses SSH (Linux) and WinRM (Windows) for communication.
 3.	Uses YAML (Playbooks) – Ansible uses simple YAML files called Playbooks to define automation tasks in a human-readable format.
@@ -12,7 +24,8 @@
 12.	Declarative & Procedural – Ansible allows both declarative (state-based) and imperative (task-based) automation.
 13.	Integrations – Works well with Docker, Kubernetes, CI/CD pipelines (Jenkins, GitHub Actions), cloud services, and more.
 14.	Event-Driven Automation – Can integrate with tools like Event-Driven Ansible to automate responses to system changes or alerts.
-15.	Low Learning Curve – Easier to learn compared to Puppet and Chef due to its simple syntax and no need for scripting knowledge.		
+15.	Low Learning Curve – Easier to learn compared to Puppet and Chef due to its simple syntax and no need for scripting knowledge.	
+_________________________________________________________________________________________________________________________________________________________________________________________________________
 Why Ansible? 
 ________________________________________
 1. Agentless Architecture 🖥️
