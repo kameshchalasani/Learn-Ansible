@@ -1,4 +1,4 @@
-                                           ### ****Writing and executing playbooks for automation****
+                                        
 
 ---
 
