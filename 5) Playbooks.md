@@ -1,4 +1,4 @@
-                                           ### **Writing and executing playbooks for automation**
+                                           ### ****Writing and executing playbooks for automation****
 
 ---
 
@@ -122,5 +122,3 @@ Here’s an example of a simple playbook with one play:
 - Python must be installed on the managed nodes for Ansible to work.
 
 ---
-
-This is the workflow and structure of Ansible playbooks as you’ve described. If you have any specific questions or need further clarification, feel free to ask!
