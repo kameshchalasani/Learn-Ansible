@@ -668,6 +668,228 @@ ansible-playbook -i inventory playbook.yml
 ```
 
 ---
+### **🔒 Integrating HashiCorp Vault with Jenkins, Ansible & Secure Secrets Management**  
+
+Now, let’s **securely manage secrets** using **HashiCorp Vault** and integrate it with **Jenkins/GitHub Actions & Ansible** for structured deployments.  
+
+---
+
+## **1️⃣ Why Use HashiCorp Vault?**  
+✅ **Secure Storage** – Encrypt passwords, SSH keys, and API tokens  
+✅ **Dynamic Secrets** – Generate short-lived credentials  
+✅ **Access Control** – Restrict secrets based on roles  
+✅ **Integration** – Works with Jenkins, Ansible, Kubernetes, and CI/CD  
+
+---
+
+## **2️⃣ Setting Up HashiCorp Vault in Kubernetes**  
+We’ll deploy Vault **as a service** inside our Kubernetes cluster.  
+
+### **Step 1: Deploy Vault in Kubernetes**
+Create a file called `vault-deployment.yaml`:  
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+        - name: vault
+          image: hashicorp/vault:latest
+          ports:
+            - containerPort: 8200
+          env:
+            - name: VAULT_DEV_ROOT_TOKEN_ID
+              value: "myroot"
+          args:
+            - "server"
+          volumeMounts:
+            - name: vault-storage
+              mountPath: /vault/data
+      volumes:
+        - name: vault-storage
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-service
+spec:
+  selector:
+    app: vault
+  ports:
+    - protocol: TCP
+      port: 8200
+      targetPort: 8200
+  type: LoadBalancer
+```
+Deploy Vault:  
+```bash
+kubectl apply -f vault-deployment.yaml
+```
+✅ **Access Vault at `http://<EXTERNAL_IP>:8200`**  
+Login with:  
+```bash
+vault login myroot
+```
+
+---
+
+## **3️⃣ Storing Secrets in Vault**
+### **Step 1: Enable KV Secrets Engine**
+Run the following:  
+```bash
+vault secrets enable -path=secret kv
+```
+
+### **Step 2: Store a Secret**
+```bash
+vault kv put secret/db username=admin password=SuperSecret123!
+```
+Retrieve it:  
+```bash
+vault kv get secret/db
+```
+
+---
+
+## **4️⃣ Using Vault in Jenkins for CI/CD 🔄**  
+### **Step 1: Install Vault Plugin in Jenkins**
+1️⃣ Go to **Manage Jenkins → Plugin Manager**  
+2️⃣ Install **Vault Plugin**  
+
+### **Step 2: Configure Vault in Jenkins**
+1️⃣ Go to **Manage Jenkins → Configure System**  
+2️⃣ Under **Vault Plugin**, set:  
+   - **Vault URL**: `http://vault-service:8200`  
+   - **Auth Token**: `myroot`  
+
+### **Step 3: Use Vault in a Jenkinsfile**
+Modify your `Jenkinsfile` to retrieve secrets dynamically:  
+```groovy
+pipeline {
+    agent any
+    environment {
+        DB_USER = vault path: 'secret/db', key: 'username'
+        DB_PASS = vault path: 'secret/db', key: 'password'
+    }
+    stages {
+        stage('Deploy') {
+            steps {
+                sh 'echo Deploying with DB User: $DB_USER'
+            }
+        }
+    }
+}
+```
+✅ **Now, Jenkins will securely fetch credentials from Vault!** 🎉  
+
+---
+
+## **5️⃣ Using Vault in an Ansible Role for Secure Deployments**
+We’ll create an **Ansible Role** that dynamically fetches secrets.  
+
+### **Step 1: Install Vault CLI in Ansible Control Node**
+Run:  
+```bash
+sudo apt update && sudo apt install vault
+```
+
+### **Step 2: Create an Ansible Role to Fetch Secrets**
+```bash
+ansible-galaxy init roles/vault_secrets
+```
+
+Modify `roles/vault_secrets/tasks/main.yml`:  
+```yaml
+- name: Fetch secrets from Vault
+  command: vault kv get -format=json secret/db
+  register: vault_output
+
+- name: Set DB variables
+  set_fact:
+    db_username: "{{ vault_output.stdout | from_json | json_query('data.data.username') }}"
+    db_password: "{{ vault_output.stdout | from_json | json_query('data.data.password') }}"
+```
+
+Modify `playbook.yml`:  
+```yaml
+- name: Deploy Secure Application
+  hosts: web_servers
+  roles:
+    - vault_secrets
+  tasks:
+    - name: Print Vault Secrets
+      debug:
+        msg: "DB User: {{ db_username }}, DB Pass: {{ db_password }}"
+```
+Run it:  
+```bash
+ansible-playbook -i inventory playbook.yml
+```
+✅ **Now, Ansible securely retrieves secrets from Vault!** 🎉  
+
+---
+
+## **6️⃣ Encrypting SSH Keys & Credentials for Multi-Server Automation**
+### **Step 1: Store SSH Private Key in Vault**
+```bash
+vault kv put secret/ssh private_key=@id_rsa
+```
+
+### **Step 2: Retrieve SSH Key in Ansible Playbook**
+Modify `playbook.yml`:  
+```yaml
+- name: Retrieve SSH Key from Vault
+  hosts: localhost
+  tasks:
+    - name: Get SSH Key
+      command: vault kv get -field=private_key secret/ssh
+      register: ssh_key_output
+
+    - name: Save SSH Key Locally
+      copy:
+        content: "{{ ssh_key_output.stdout }}"
+        dest: "~/.ssh/id_rsa"
+        mode: '0600'
+```
+✅ **Now, SSH keys are encrypted in Vault and dynamically retrieved for automation!** 🔐  
+
+---
+
+## **7️⃣ Automating Everything with Ansible Playbook**
+Modify `playbook.yml`:  
+```yaml
+- name: Secure CI/CD & Ansible with Vault
+  hosts: localhost
+  tasks:
+    - name: Deploy Vault
+      command: kubectl apply -f vault-deployment.yaml
+
+    - name: Store DB Secrets
+      command: vault kv put secret/db username=admin password=SuperSecret123!
+
+    - name: Store SSH Key
+      command: vault kv put secret/ssh private_key=@id_rsa
+```
+Run it:  
+```bash
+ansible-playbook -i inventory playbook.yml
+```
+✅ **Now, everything is automated: Vault setup, secret storage, and secure CI/CD deployment!** 🚀  
+
+---
+
 
 
 
